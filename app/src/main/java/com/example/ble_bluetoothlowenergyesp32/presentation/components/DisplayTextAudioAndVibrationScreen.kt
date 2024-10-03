@@ -72,7 +72,7 @@ fun DisplayTextAudioAndVibrationScreen(
 
     Log.d("DisplayTextAudioAndVibrationScreen", "Current Bluetooth Connection State: $bleConnectionState")
 
-    val ttsState = textToSpeechViewModel.state.value
+
 
     DisposableEffect(
         key1 = lifecycleOwner,

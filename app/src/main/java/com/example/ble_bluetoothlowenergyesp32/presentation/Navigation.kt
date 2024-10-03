@@ -1,7 +1,7 @@
 package com.example.ble_bluetoothlowenergyesp32.presentation
 
 
-import SoundController
+import SoundControllerViewModel
 import android.bluetooth.BluetoothAdapter
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -22,7 +22,7 @@ fun Navigation(
     onPlay:()->Unit,
     onStop:()->Unit,
     onPositionChanged: (Float, Float, Float) -> Unit,
-    soundManager:SoundController,
+    soundManager:SoundControllerViewModel,
     configViewModel: ConfigViewModel
 ){
     val navController = rememberNavController()

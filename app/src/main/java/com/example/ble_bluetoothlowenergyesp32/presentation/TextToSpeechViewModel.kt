@@ -6,6 +6,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 
 import androidx.lifecycle.ViewModel
+import com.example.ble_bluetoothlowenergyesp32.data.TextToSpeechState
 import java.util.Locale
 
 class TextToSpeechViewModel:ViewModel() {

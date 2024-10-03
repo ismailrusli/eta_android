@@ -1,4 +1,4 @@
-package com.example.ble_bluetoothlowenergyesp32.presentation
+package com.example.ble_bluetoothlowenergyesp32.data
 
 data class TextToSpeechState(
     val isTTSEnabled:Boolean = true,

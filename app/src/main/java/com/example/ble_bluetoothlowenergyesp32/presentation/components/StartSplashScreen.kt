@@ -7,11 +7,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,11 +57,13 @@ fun StartSplashScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column {
+        Column (
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Box(
                 modifier = Modifier
                     .size(150.dp)
-                    .clip(CircleShape)
+                    .clip(RoundedCornerShape(10.dp))
                     .background(Color.Blue, CircleShape)
                     .clickable {
                         if (permissionState.allPermissionsGranted){
@@ -88,70 +92,77 @@ fun StartSplashScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            Box(
-                modifier = Modifier
-                    .size(150.dp)
-                    .clip(CircleShape)
-                    .background(Color.Blue, CircleShape)
-                    .clickable {
-                        if (permissionState.allPermissionsGranted){
-                            if (bluetoothAdapter.isEnabled){
-                                navController.navigate(Screen.TestCaseScreen.route) {
-                                    popUpTo(Screen.StartSplashScreen.route) {
-                                        inclusive = true
+            Row{
+                Box(
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.Blue, CircleShape)
+                        .clickable {
+                            if (permissionState.allPermissionsGranted){
+                                if (bluetoothAdapter.isEnabled){
+                                    navController.navigate(Screen.TestCaseScreen.route) {
+                                        popUpTo(Screen.StartSplashScreen.route) {
+                                            inclusive = true
+                                        }
                                     }
+                                }else{
+                                    onBluetoothStateChanged()
                                 }
                             }else{
-                                onBluetoothStateChanged()
+                                permissionState.launchMultiplePermissionRequest()
                             }
-                        }else{
-                            permissionState.launchMultiplePermissionRequest()
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Test",
-                    fontSize = 35.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Vibration and TTS Test",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
 
 
-            Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
-            Box(
-                modifier = Modifier
-                    .size(150.dp)
-                    .clip(CircleShape)
-                    .background(Color.Blue, CircleShape)
-                    .clickable {
-                        if (permissionState.allPermissionsGranted){
-                            if (bluetoothAdapter.isEnabled){
-                                navController.navigate(Screen.SpatialAudioScreen.route) {
-                                    popUpTo(Screen.StartSplashScreen.route) {
-                                        inclusive = true
+                Box(
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.Blue, CircleShape)
+                        .clickable {
+                            if (permissionState.allPermissionsGranted){
+                                if (bluetoothAdapter.isEnabled){
+                                    navController.navigate(Screen.SpatialAudioScreen.route) {
+                                        popUpTo(Screen.StartSplashScreen.route) {
+                                            inclusive = true
+                                        }
                                     }
+                                }else{
+                                    onBluetoothStateChanged()
                                 }
                             }else{
-                                onBluetoothStateChanged()
+                                permissionState.launchMultiplePermissionRequest()
                             }
-                        }else{
-                            permissionState.launchMultiplePermissionRequest()
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Test",
-                    fontSize = 35.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Audio Spatial Screen",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
 
         }
+
+
+
+
+
 
     }
 }

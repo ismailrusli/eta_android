@@ -1,6 +1,6 @@
 package com.example.ble_bluetoothlowenergyesp32
 
-import SoundController
+import SoundControllerViewModel
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
@@ -9,13 +9,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ble_bluetoothlowenergyesp32.presentation.BluetoothLEViewModel
@@ -58,7 +51,7 @@ class MainActivity : ComponentActivity() {
                     onPlay = { play() },
                     onStop = { stop() },
                     onPositionChanged = { x, y, z -> setAudioPosition(x, y, z) },
-                    soundManager = SoundController(this),
+                    soundManager = SoundControllerViewModel(this),
                     configViewModel = configViewModel
                 )
             }

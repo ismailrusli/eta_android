@@ -14,6 +14,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ble_bluetoothlowenergyesp32.data.ConfigData
 import com.example.ble_bluetoothlowenergyesp32.presentation.ConfigViewModel
 
+//Bersihkan nanti
+
 @Composable
 fun DualSlider(
     value1: Float,
@@ -94,7 +96,7 @@ fun ConfigScreen(
                 newMinJarak = min
                 newMaxJarak = max
             },
-            valueRange = 0f..100f // Adjust the range as needed
+            valueRange = 0f..500f // Adjust the range as needed
         )
 
         // Gradient Slider for Amplitudo
