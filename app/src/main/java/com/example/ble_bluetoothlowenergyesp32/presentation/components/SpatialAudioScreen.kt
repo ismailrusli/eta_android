@@ -34,7 +34,7 @@ fun SpatialAudioScreen(
     var index by remember { mutableStateOf(0) }
     var isPlaying by remember { mutableStateOf(false) }  // Flag untuk kontrol loop
 
-    var arrayJarakR = remember { FloatArray(20) { abs(Random.nextFloat() * 1000 - 500) } }
+    var arrayJarakR = remember { FloatArray(20) { abs(Random.nextFloat() * 1000 - 900 ) } }
     var thetaTest = remember {
         FloatArray(20) { index -> (index + 1) * (Math.PI.toFloat() / 20f) }
     }
