@@ -63,6 +63,27 @@ class SoundControllerViewModel(context: Context) : ViewModel() {
         }
     }
 
+    fun playSoundTest(jari_jari:Float, jarakMaksimum: Int, theta:Float){
+
+
+
+        // Normalisasi jarak (semakin jauh jarak, semakin kecil volume)
+        val volume = (1 - (jari_jari / jarakMaksimum)).coerceIn(0f, 1f)
+
+        // Hitung panning berdasarkan sudut theta (kuadran 1 dan 2)
+        val leftVolume = (theta / PI.toFloat()) * volume
+        val rightVolume = (1 - theta / PI.toFloat()) * volume
+
+
+        if (streamId == 0) {
+            // Jika belum diputar, mulai putar suara dan simpan streamId
+            streamId = soundPool.play(buzzingSound, leftVolume, rightVolume, 1, -1, 1f)
+        } else {
+            // Jika suara sudah diputar, perbarui volume tanpa menghentikan suara
+            soundPool.setVolume(streamId, leftVolume, rightVolume)
+        }
+    }
+
     // Fungsi untuk menghentikan suara secara manual
     fun stopBuzzingSound() {
         if (streamId != 0) {
