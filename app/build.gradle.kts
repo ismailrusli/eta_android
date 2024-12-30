@@ -1,18 +1,17 @@
-
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id ("kotlin-kapt")
     id ("dagger.hilt.android.plugin")
+    id("com.chaquo.python")
 }
 
 android {
-    namespace = "com.example.ble_bluetoothlowenergyesp32"
+    namespace = "com.example.ble_audiospasialdariesp32sonaraudio"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.ble_bluetoothlowenergyesp32"
+        applicationId = "com.example.ble_audiospasialdariesp32sonaraudio"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -21,6 +20,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+        ndk {
+            // On Apple silicon, you can omit x86_64.
+            abiFilters += listOf("arm64-v8a", "x86_64")
         }
     }
 
@@ -51,16 +54,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
-    externalNativeBuild {
-        cmake {
-            path ( "src/main/cpp/CMakeLists.txt" ) // Path ke file CMakeLists.txt
-            version = "3.30.3"          // Versi CMake
-        }
-    }
-
 }
-
 
 dependencies {
 
@@ -81,31 +75,37 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
+
+
+    implementation ("androidx.compose.material3:material3:<version>")
+
     //DI
-    implementation ("com.google.dagger:hilt-android:2.52")
-    annotationProcessor ("com.google.dagger:hilt-compiler:2.52")
-    kapt ("com.google.dagger:hilt-compiler:2.52")
-    kapt ("androidx.hilt:hilt-compiler:1.0.0")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation("com.google.dagger:hilt-android:2.52")
+    annotationProcessor("com.google.dagger:hilt-compiler:2.52")
+    kapt("com.google.dagger:hilt-compiler:2.52")
+    kapt("androidx.hilt:hilt-compiler:1.0.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     //Navigation
-    implementation ("androidx.navigation:navigation-compose:2.5.2")
+    implementation("androidx.navigation:navigation-compose:2.5.2")
 
     //Permissions
-    implementation ("com.google.accompanist:accompanist-permissions:0.21.1-beta")
+    implementation("com.google.accompanist:accompanist-permissions:0.21.1-beta")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
 
     //Test Unit
-    androidTestImplementation ("androidx.compose.ui:ui-test-junit4:$version")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$version")
 
-    debugImplementation( "androidx.compose.ui:ui-test-manifest:$rootProject.composeVersion")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$rootProject.composeVersion")
 
     //AudioPlayer
-    implementation ("com.google.oboe:oboe:1.6.0")
+    implementation("com.google.oboe:oboe:1.6.0")
 
 
-    implementation ("androidx.media:media:1.6.0") // For SoundPool
+    implementation("androidx.media:media:1.6.0") // For SoundPool
 
-
+    implementation ("com.google.code.gson:gson:2.10.1") //jsonreader
 }
+
+

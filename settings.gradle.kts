@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BLE_BluetoothLowEnergyESP32"
+rootProject.name = "BLE_AudioSpasialdariESP32SonarAudio"
 include(":app")
  
