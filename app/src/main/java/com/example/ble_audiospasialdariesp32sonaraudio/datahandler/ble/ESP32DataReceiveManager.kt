@@ -161,7 +161,6 @@ class ESP32DataReceiveManager @Inject constructor(
                 }
             }
         }
-
     }
 
     override fun startConnection() {
@@ -209,6 +208,4 @@ class ESP32DataReceiveManager @Inject constructor(
         bleScanner.stopScan(scanCallback)
         gatt?.close()
     }
-
-
 }
