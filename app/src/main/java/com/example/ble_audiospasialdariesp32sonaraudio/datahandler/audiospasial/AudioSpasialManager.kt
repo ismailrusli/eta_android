@@ -18,8 +18,6 @@ class AudioSpasialManager(
     context: Context
 )
 {
-
-
     private val soundPool: SoundPool
     private var buzzingSound: Int = 0
     private var pingSound: Int = 0
@@ -132,8 +130,6 @@ class AudioSpasialManager(
     // Ubah sudut theta ke kuadran 1 dan 4
     //perbedaan waktu kedatangan suara antara dua telinga (iitd)
 
-
-
     fun itdCalculation(
         sudutTheta : Int
     ):Float{
@@ -141,9 +137,6 @@ class AudioSpasialManager(
         // rata rata jarak antra dua telinga itu 20 cm. 34300 itu kecepatan suara
         return (20 * sin(sudutDalamRadian)) / 34300 * 1000
     }
-
-
-
 
     fun simulate3DAudioUsingITD(
         jari_jari:Float,
@@ -156,9 +149,6 @@ class AudioSpasialManager(
 
         val(iidKiri, iidKanan) = iidCalculationVolume(sudutTheta, jarakMaksimum.toFloat(), jari_jari)
         val itdVolume = itdCalculation(sudutTheta)
-
-
-
 
         Log.d("SoundController", "ITD: $itdVolume ms for angle: $sudutTheta")
 
@@ -206,7 +196,6 @@ class AudioSpasialManager(
         }
     }
 
-
     fun playBuzzingSoundDownMixing(
         jari_jari: Float,
         jarakMaksimum: Float,
@@ -246,7 +235,6 @@ class AudioSpasialManager(
         // Hitung volume akhir untuk kanal kiri dan kanan
         val finalVolumeLeft = (volumeFL + volumeRL + volumeCenter) / 3 // Rata-rata volume untuk kiri
         val finalVolumeRight = (volumeFR + volumeRR + volumeCenter) / 3 // Rata-rata volume untuk kanan
-
     }
 
     // Fungsi untuk membersihkan resource SoundPool no memory leak mwahahah

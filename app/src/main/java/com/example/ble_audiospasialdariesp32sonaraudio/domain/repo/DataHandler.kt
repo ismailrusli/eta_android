@@ -8,9 +8,6 @@ import kotlin.math.sqrt
 
 class DataHandler(
 ){
-
-    
-
     @Composable
     fun DeltaTime(
         timestamp: Long?
@@ -44,7 +41,6 @@ class DataHandler(
 
             // Konstanta Madgwick
             val beta = 0.1 // Parameter konvergensi (sesuaikan dengan kebutuhan)
-
 
             val deltaTime = DeltaTime(timestamp)
 
@@ -111,14 +107,12 @@ class DataHandler(
             val pitch = Math.toDegrees(Math.asin(2 * (q0 * q2 - q3 * q1)))
             val yaw = Math.toDegrees(Math.atan2((2 * (q0 * q3 + q1 * q2)), (1 - 2 * (q2 * q2 + q3 * q3))))
 
-
             // Return IMUTerolahData
             return IMUTerolahDataSudut(roll = roll.toInt(), pitch = pitch.toInt(), yaw = yaw.toInt())
         }else{
             return IMUTerolahDataSudut(0,0,0)
         }
     }
-
 
     @Composable
     public fun PosisiXYZ(
@@ -139,7 +133,6 @@ class DataHandler(
                 velocity.value[i] = initialVelocity.value[i] + (accelData?.get(i) ?: 0.0) * deltaTime
 
                 position.value[i] = (initialPosition.value[i] + velocity.value[i] * deltaTime).toFloat()
-
 
                 initialVelocity = velocity
                 initialPosition = position
