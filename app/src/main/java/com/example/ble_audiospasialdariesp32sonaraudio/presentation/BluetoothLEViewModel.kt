@@ -62,10 +62,10 @@ class BluetoothLEViewModel @Inject constructor(
                             _kecepatanAngular.value = result.data.kecepatanPutaran
                             _kecepatanAkselerasi.value = result.data.kecepatanTranslasi
 
-                            Log.d("BluetoothLEViewModel", "Updated Connection in ViewModel: ${_connectionState.value}")
-                            Log.d("BluetoothLEViewModel", "Updated Jarak in ViewModel: ${jarak.value}")
-                            Log.d("BluetoothLEViewModel", "Updated Gyro in ViewModel: ${_kecepatanAngular.value}")
-                            Log.d("BluetoothLEViewModel", "Updated Gyro in ViewModel: ${_kecepatanAkselerasi.value}")
+//                            Log.d("BluetoothLEViewModel", "Updated Connection in ViewModel: ${_connectionState.value}")
+//                            Log.d("BluetoothLEViewModel", "Updated Jarak in ViewModel: ${jarak.value}")
+//                            Log.d("BluetoothLEViewModel", "Updated Gyro in ViewModel: ${_kecepatanAngular.value}")
+//                            Log.d("BluetoothLEViewModel", "Updated Gyro in ViewModel: ${_kecepatanAkselerasi.value}")
 
                         }
                         is Resource.Loading -> {

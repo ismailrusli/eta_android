@@ -20,42 +20,65 @@ import com.example.ble_audiospasialdariesp32sonaraudio.presentation.OccupiedGrid
 
 @Composable
 fun GridUI(
-    viemModel : OccupiedGridViewModel
+    viewModel: OccupiedGridViewModel
 ) {
-
-    val grid = viemModel.getOccupiedGrid()
+    // Ambil grid dari ViewModel
+    val grid = viewModel.getOccupiedGrid() // List of 2D grids
+    val layersCount = grid.size // Jumlah layer Z
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.Top
     ) {
-        // Grid Display
-        Text("Occupied Grid")
+        Text("Occupied Grid (3D Representation)")
+
+        // Gunakan LazyColumn untuk membuat grid yang dapat digulir
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f) // Untuk memberikan space agar grid bisa scrollable
         ) {
-            items(grid.size) { i ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+            items(layersCount) { z ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
                 ) {
-                    grid[i].forEachIndexed { j, plane ->
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .background(
-                                    if (plane.any { it }) Color.Red else Color.Gray,
-                                    shape = RoundedCornerShape(4.dp)
-                                )
-                        )
+                    Text(
+                        text = "Layer Z = $z",
+                        modifier = Modifier
+                            .padding(bottom = 4.dp)
+                            .fillMaxWidth()
+                    )
+
+                    // Buat grid 2D untuk layer Z
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(grid[z].size) { y ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 2.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                grid[z][y].forEach { cell ->
+                                    Box(
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                            .background(
+                                                if (cell) Color.Red else Color.Gray,
+                                                shape = RoundedCornerShape(4.dp)
+                                            )
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
-
 }

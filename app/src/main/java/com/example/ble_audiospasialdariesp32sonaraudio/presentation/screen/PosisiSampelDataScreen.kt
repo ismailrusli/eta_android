@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -29,7 +31,9 @@ import com.example.ble_audiospasialdariesp32sonaraudio.domain.repo.ConnectionSta
 import com.example.ble_audiospasialdariesp32sonaraudio.domain.repo.DataHandler
 import com.example.ble_audiospasialdariesp32sonaraudio.permissions.SystemBroadcastReceiver
 import com.example.ble_audiospasialdariesp32sonaraudio.presentation.BluetoothLEViewModel
+import com.example.ble_audiospasialdariesp32sonaraudio.presentation.ConfigViewModel
 import com.example.ble_audiospasialdariesp32sonaraudio.presentation.OccupiedGridViewModel
+import com.example.ble_audiospasialdariesp32sonaraudio.presentation.TextToSpeechViewModel
 import com.example.ble_audiospasialdariesp32sonaraudio.presentation.components.GridUI
 
 @Composable
@@ -37,6 +41,8 @@ fun PosisiSampelDataScreen(
     bluetoothLEViewModel: BluetoothLEViewModel = hiltViewModel(),
     audioSpasialManager: AudioSpasialManager,
     gridViewModel: OccupiedGridViewModel,
+    ttsViewModel: TextToSpeechViewModel,
+    configViewModel: ConfigViewModel,
     onBluetoothStateChanged: () -> Unit
 ) {
     val context = LocalContext.current
@@ -49,7 +55,6 @@ fun PosisiSampelDataScreen(
             onBluetoothStateChanged()
         }
     }
-
 
     val jarak by bluetoothLEViewModel.jarak.collectAsState()
     val timestamp by bluetoothLEViewModel.timestamp.collectAsState()
@@ -69,65 +74,64 @@ fun PosisiSampelDataScreen(
         ) {
             when (connectionState) {
                 ConnectionState.Connected -> {
-                    var posisiX by remember { mutableStateOf(listDataAkselerasi.positionX.toString()) }
-                    var posisiY by remember { mutableStateOf(listDataAkselerasi.positionY.toString()) }
-                    var posisiZ by remember { mutableStateOf(listDataAkselerasi.positionZ.toString()) }
-
-                    var roll by remember { mutableStateOf(listDataSudut.roll) }
                     var pitch by remember { mutableStateOf(listDataSudut.pitch) }
                     var yaw by remember { mutableStateOf(listDataSudut.yaw) }
 
-                    jarak?.let { gridViewModel.tagOccupiedGrid(it, pitch, yaw) }
+                    // Cek apakah jarak null atau tidak valid
+                    if (jarak == null) {
+                        // Jika jarak tidak valid (null atau 0), reset grid
+                        gridViewModel.resetGrid()
+                        Log.d("PosisiSampelDataScreen", "Data tidak valid, grid di-reset.")
+                    } else {
+                        // Jika jarak valid, update grid
+                        gridViewModel.updateGrid(
+                            configViewModel.maxJarak,
+                            imuDataPosisi = listDataAkselerasi,
+                            imuDataSudut = listDataSudut,
+                            sensorDistance = jarak!!
+                        )
 
-                    GridUI(
-                        gridViewModel
-                    )
+                        GridUI(gridViewModel)
 
-                    // Display Akselerasi (Position)
-                    Text(text = "Akselerasi : ")
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(text = "X : $posisiX")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = "Y : $posisiY")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = "Z : $posisiZ")
+                        Spacer(modifier = Modifier.size(20.dp))
 
-                    Spacer(modifier = Modifier.width(40.dp))
+                        // Create the text to display and speak
+                        val text = "Jarak Objek : $jarak centimeter Berada di sebelah ${if (yaw > 0) "Kanan" else "Kiri"} ${if (pitch > 0) "Atas" else "Bawah"}"
 
-                    // Display Sudut (Roll, Pitch, Yaw)
-                    Text(text = "Sudut : ")
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(text = "Roll : $roll")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = "Pitch : $pitch")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = "Yaw : $yaw")
+                        // Update the text for TTS
+                        ttsViewModel.updateText(text)
 
-                    Spacer(modifier = Modifier.width(40.dp))
+                        Text(text = text)
 
-                    // Display Jarak
-                    Text(text = "Jarak : ${jarak.toString()}")
+                        // Button for Text-to-Speech (TTS)
+                        Button(
+                            onClick = {
+                                ttsViewModel.toggleTTS()
+                            },
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        ) {
+                            Text(text = if (ttsViewModel.data.isTTSEnabled) "Stop Baca Jarak" else "Baca Jarak")
+                        }
 
-                    Spacer(modifier = Modifier.width(40.dp))
-
-                    // Display Kecepatan Angular (Gyro)
-                    Text(text = "Kecepatan Angular (Gyro) : ")
-                    Spacer(modifier = Modifier.width(20.dp))
-
-                    // Loop through and display the elements of the kecepatanAngular array
-                    kecepatanAngular!!.forEachIndexed { index, value ->
-                        Text(text = "Gyro $index: $value")
-                    }// Loop through and display the elements of the kecepatanAngular array\
-                    Spacer(modifier = Modifier.width(40.dp))
-                    kecepatanAkselerasi!!.forEachIndexed { index, value ->
-                        Text(text = "Aksel $index: $value")
+                        // Simulasi audio spasial berdasarkan jarak dan yaw
+                        jarak?.let {
+                            audioSpasialManager.simulate3DAudioUsingITD(
+                                it,
+                                50,
+                                yaw,
+                                "ping"
+                            )
+                        }
                     }
-
-
                 }
                 ConnectionState.Uninitialized -> {
                     Text(text = "Koneksi belum diinisialisasi")
                     bluetoothLEViewModel.startConnection()
+                }
+                ConnectionState.Disconnected -> {
+                    // Jika koneksi terputus, reset grid
+                    gridViewModel.resetGrid()
+                    Text(text = "Koneksi terputus")
                 }
                 else -> {
                     Text(text = "Menghubungkan...")
@@ -143,4 +147,6 @@ fun PosisiSampelDataScreen(
         }
     }
 }
+
+
 

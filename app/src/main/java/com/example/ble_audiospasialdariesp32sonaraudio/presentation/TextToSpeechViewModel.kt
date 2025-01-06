@@ -14,7 +14,7 @@ import java.util.Locale
 
 class TextToSpeechViewModel(
     context: Context
-):ViewModel() {
+): ViewModel() {
     private var tts: TextToSpeech? = null
     var data by mutableStateOf(TTSData())
         private set
@@ -27,14 +27,23 @@ class TextToSpeechViewModel(
         }
     }
 
+    // Update the text to be spoken
     fun updateText(newText: String) {
         data = data.copy(text = newText)
     }
 
-    fun toggleTTS(isEnabled: Boolean) {
-        data = data.copy(isTTSEnabled = isEnabled)
+    // Toggle TTS enabled/disabled
+    fun toggleTTS() {
+        if (data.isTTSEnabled) {
+            data = data.copy(isTTSEnabled = false)
+            tts?.stop()
+        } else {
+            data = data.copy(isTTSEnabled = true)
+            speakText()  // Immediately speak the text when TTS is enabled
+        }
     }
 
+    // Speak the text
     fun speakText() {
         if (data.isTTSEnabled && data.text.isNotEmpty()) {
             viewModelScope.launch {
@@ -44,7 +53,8 @@ class TextToSpeechViewModel(
     }
 
     override fun onCleared() {
-        super.onCleared()
         tts?.shutdown()
+        tts?.stop()
+        super.onCleared()
     }
 }

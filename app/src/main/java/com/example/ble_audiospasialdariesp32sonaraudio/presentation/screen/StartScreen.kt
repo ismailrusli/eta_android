@@ -66,24 +66,6 @@ fun StartScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             Row {
-
-                ButtonNavigasi(
-                    navController = navController,
-                    onBluetoothStateChanged = onBluetoothStateChanged,
-                    permissionState = permissionsState,
-                    route = Screen.SpatialAudioScreen.route,
-                    aksi = "Audio Spasial Test",
-                    bluetoothAdapter = bluetoothAdapter
-                )
-                Spacer(modifier = Modifier.width(20.dp))
-                ButtonNavigasi(
-                    navController = navController,
-                    onBluetoothStateChanged = onBluetoothStateChanged,
-                    permissionState = permissionsState,
-                    route = Screen.PosisiSampelDataScreen.route,
-                    aksi = "Sampel Data",
-                    bluetoothAdapter = bluetoothAdapter
-                )
                 Spacer(modifier = Modifier.width(20.dp))
                 ButtonNavigasi(
                     navController = navController,

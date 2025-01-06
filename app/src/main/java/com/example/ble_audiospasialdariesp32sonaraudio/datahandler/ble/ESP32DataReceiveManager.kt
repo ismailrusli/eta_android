@@ -35,7 +35,7 @@ class ESP32DataReceiveManager @Inject constructor(
     @Volatile
     private var connectionState: ConnectionState = ConnectionState.Uninitialized
 
-    private val DEVICE_NAME = "ESP32-BLE"
+    private val DEVICE_NAME = "USonic"
     private val SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
     private val CHARASTERISTICS_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
     private val CLIENT_CHARACTERISTIC_CONFIG_UUID = "00002902-0000-1000-8000-00805f9b34fb"
@@ -119,10 +119,10 @@ class ESP32DataReceiveManager @Inject constructor(
                     val _kecepatanTranslasiArray = dataString[3].split(";")
 
                     // Log the parsed values
-                    Log.d("BluetoothGattCallback", "Parsed Jarak: $_jarak")
-                    Log.d("BluetoothGattCallback", "Parsed Timestamp: $_timestamp")
-                    Log.d("BluetoothGattCallback", "Parsed Kecepatan Putaran: ${_kecepatanPutaranArray.joinToString()}")
-                    Log.d("BluetoothGattCallback", "Parsed Kecepatan Translasi: ${_kecepatanTranslasiArray.joinToString()}")
+//                    Log.d("BluetoothGattCallback", "Parsed Jarak: $_jarak")
+//                    Log.d("BluetoothGattCallback", "Parsed Timestamp: $_timestamp")
+//                    Log.d("BluetoothGattCallback", "Parsed Kecepatan Putaran: ${_kecepatanPutaranArray.joinToString()}")
+//                    Log.d("BluetoothGattCallback", "Parsed Kecepatan Translasi: ${_kecepatanTranslasiArray.joinToString()}")
 
                     connectionState = ConnectionState.Connected
 
@@ -148,13 +148,13 @@ class ESP32DataReceiveManager @Inject constructor(
                                 )
                             )
                         )
-                        Log.d("BluetoothGattCallback", "Parsed Kecepatan Putaran: ${_kecepatanPutaranArray[0].toString()}")
+                       // Log.d("BluetoothGattCallback", "Parsed Kecepatan Putaran: ${_kecepatanPutaranArray[0].toString()}")
 
                         // Log the successful data emission
-                        Log.d("BluetoothGattCallback", "Data emitted successfully to dataFlow.")
+                       // Log.d("BluetoothGattCallback", "Data emitted successfully to dataFlow.")
                     }
                 } catch (e: Exception) {
-                    Log.e("BluetoothGattCallback", "Error parsing characteristic value: ${e.message}")
+                  //  Log.e("BluetoothGattCallback", "Error parsing characteristic value: ${e.message}")
                     coroutineScope.launch {
                         dataFlow.emit(Resource.Error("Gagal memproses data dari karakteristik: ${e.message}"))
                     }

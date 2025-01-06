@@ -13,6 +13,13 @@ class ConfigViewModel : ViewModel() {
     val configData: ConfigData
         get() = _configData.value
 
+    // Explicit getters for minJarak and maxJarak
+    val minJarak: Float
+        get() = _configData.value.minJarak
+
+    val maxJarak: Float
+        get() = _configData.value.maxJarak
+
     // Update minJarak
     fun updateMinJarak(minJarak: Float) {
         _configData.value = _configData.value.copy(minJarak = minJarak)

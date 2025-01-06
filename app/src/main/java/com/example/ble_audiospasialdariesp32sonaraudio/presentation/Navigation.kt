@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.ble_audiospasialdariesp32sonaraudio.datahandler.audiospasial.AudioSpasialManager
+import com.example.ble_audiospasialdariesp32sonaraudio.presentation.screen.ConfigScreen
 import com.example.ble_audiospasialdariesp32sonaraudio.presentation.screen.PosisiSampelDataScreen
 import com.example.ble_audiospasialdariesp32sonaraudio.presentation.screen.StartScreen
 
@@ -21,7 +22,9 @@ fun Navigation(
     val navController = rememberNavController()
     val bluetoothLEViewModel = hiltViewModel<BluetoothLEViewModel>()
     val audioSpasialManager = AudioSpasialManager(context)
-    val gridViewModel = OccupiedGridViewModel(context)
+    val configViewModel = ConfigViewModel()
+    val gridViewModel = OccupiedGridViewModel()
+    val ttsViewModel = TextToSpeechViewModel(context)
 
     NavHost(
         navController = navController,
@@ -43,13 +46,20 @@ fun Navigation(
             )
         }
 
-
         composable(Screen.PosisiSampelDataScreen.route){
             PosisiSampelDataScreen(
-                bluetoothLEViewModel,
-                audioSpasialManager,
-                gridViewModel,
-                onBluetoothStateChanged
+                bluetoothLEViewModel = bluetoothLEViewModel,
+                audioSpasialManager = audioSpasialManager,
+                gridViewModel = gridViewModel,
+                ttsViewModel = ttsViewModel,
+                configViewModel = configViewModel,
+                onBluetoothStateChanged = onBluetoothStateChanged
+            )
+        }
+
+        composable(Screen.ConfigScreen.route){
+            ConfigScreen(
+                viewModel = configViewModel
             )
         }
 
@@ -59,7 +69,7 @@ fun Navigation(
 sealed class Screen (val route:String){
     object StartScreen:Screen("start_screen")
     object ScanAndPairedDeviceScreen:Screen ("scan_and_paired_device_screen")
-    object SpatialAudioScreen:Screen("spatial_audio_screen")
+    //object SpatialAudioScreen:Screen("spatial_audio_screen")
     object ConfigScreen:Screen("config_screen")
     object PosisiSampelDataScreen:Screen("posisi_sampel_data_screen")
 }
