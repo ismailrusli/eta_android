@@ -120,7 +120,7 @@ class ESP32DataReceiveManager @Inject constructor(
 
                     // Log the parsed values
 //                    Log.d("BluetoothGattCallback", "Parsed Jarak: $_jarak")
-//                    Log.d("BluetoothGattCallback", "Parsed Timestamp: $_timestamp")
+                    Log.d("BluetoothGattCallback", "Parsed Timestamp: $_timestamp")
 //                    Log.d("BluetoothGattCallback", "Parsed Kecepatan Putaran: ${_kecepatanPutaranArray.joinToString()}")
 //                    Log.d("BluetoothGattCallback", "Parsed Kecepatan Translasi: ${_kecepatanTranslasiArray.joinToString()}")
 

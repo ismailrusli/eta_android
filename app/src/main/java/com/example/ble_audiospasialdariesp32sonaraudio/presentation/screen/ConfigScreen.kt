@@ -32,7 +32,7 @@ fun ConfigScreen(viewModel: ConfigViewModel) {
                 value = configData.minJarak,
                 onValueChange = { viewModel.updateMinJarak(it) },
                 valueRange = 0f..configData.maxJarak,
-                steps = 10,
+                steps = 11,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -45,8 +45,8 @@ fun ConfigScreen(viewModel: ConfigViewModel) {
             Slider(
                 value = configData.maxJarak,
                 onValueChange = { viewModel.updateMaxJarak(it) },
-                valueRange = configData.minJarak..configData.maxJarak,
-                steps = 10,
+                valueRange = configData.minJarak..500f,
+                steps = 11,
                 modifier = Modifier.fillMaxWidth()
             )
         }

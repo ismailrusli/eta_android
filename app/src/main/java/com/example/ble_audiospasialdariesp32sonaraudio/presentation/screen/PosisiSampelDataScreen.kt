@@ -47,6 +47,19 @@ fun PosisiSampelDataScreen(
 ) {
     val context = LocalContext.current
 
+    // Manage previous timestamp with remember
+    var previousTimestamp by remember { mutableStateOf<Long?>(null) }
+
+    // Calculate deltaTime
+    val timestamp = System.currentTimeMillis()
+    val deltaTime = if (previousTimestamp != null) {
+        timestamp - previousTimestamp!!
+    } else {
+        0L
+    }
+    previousTimestamp = timestamp
+    Log.d("TimeSTamp", "Delta Time: $previousTimestamp ms")
+
     // Receiver for Bluetooth state changes
     SystemBroadcastReceiver(systemAction = BluetoothAdapter.ACTION_STATE_CHANGED) { bluetoothState ->
         val action = bluetoothState?.action ?: return@SystemBroadcastReceiver
@@ -57,13 +70,16 @@ fun PosisiSampelDataScreen(
     }
 
     val jarak by bluetoothLEViewModel.jarak.collectAsState()
-    val timestamp by bluetoothLEViewModel.timestamp.collectAsState()
     val kecepatanAngular by bluetoothLEViewModel.kecepatanAngular.collectAsState()
     val kecepatanAkselerasi by bluetoothLEViewModel.kecepatanAkselerasi.collectAsState()
     val connectionState by bluetoothLEViewModel.connectionState.collectAsState()
 
-    val listDataSudut = DataHandler().RollPitchYaw(context, timestamp, kecepatanAngular, kecepatanAkselerasi)
-    val listDataAkselerasi = DataHandler().PosisiXYZ(context, timestamp, kecepatanAkselerasi)
+    // Pass deltaTime to DataHandler functions
+    val dataHandler = DataHandler()
+    val listDataSudut = dataHandler.RollPitchYaw(context, deltaTime, kecepatanAngular, kecepatanAkselerasi)
+    val listDataAkselerasi = dataHandler.PosisiXYZ(context, deltaTime, kecepatanAkselerasi)
+    var yaw by remember { mutableStateOf(listDataSudut.yaw) }
+    var pitch by remember { mutableStateOf(listDataSudut.pitch) }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -74,16 +90,13 @@ fun PosisiSampelDataScreen(
         ) {
             when (connectionState) {
                 ConnectionState.Connected -> {
-                    var pitch by remember { mutableStateOf(listDataSudut.pitch) }
-                    var yaw by remember { mutableStateOf(listDataSudut.yaw) }
 
-                    // Cek apakah jarak null atau tidak valid
+
+
                     if (jarak == null) {
-                        // Jika jarak tidak valid (null atau 0), reset grid
                         gridViewModel.resetGrid()
                         Log.d("PosisiSampelDataScreen", "Data tidak valid, grid di-reset.")
                     } else {
-                        // Jika jarak valid, update grid
                         gridViewModel.updateGrid(
                             configViewModel.maxJarak,
                             imuDataPosisi = listDataAkselerasi,
@@ -91,19 +104,16 @@ fun PosisiSampelDataScreen(
                             sensorDistance = jarak!!
                         )
 
-                        GridUI(gridViewModel)
-
+                        Log.d("TimeSTamp", "Delta Time: $deltaTime ms")
                         Spacer(modifier = Modifier.size(20.dp))
 
-                        // Create the text to display and speak
                         val text = "Jarak Objek : $jarak centimeter Berada di sebelah ${if (yaw > 0) "Kanan" else "Kiri"} ${if (pitch > 0) "Atas" else "Bawah"}"
 
-                        // Update the text for TTS
+                        Text(text = "yaw : $yaw")
                         ttsViewModel.updateText(text)
 
                         Text(text = text)
 
-                        // Button for Text-to-Speech (TTS)
                         Button(
                             onClick = {
                                 ttsViewModel.toggleTTS()
@@ -113,7 +123,6 @@ fun PosisiSampelDataScreen(
                             Text(text = if (ttsViewModel.data.isTTSEnabled) "Stop Baca Jarak" else "Baca Jarak")
                         }
 
-                        // Simulasi audio spasial berdasarkan jarak dan yaw
                         jarak?.let {
                             audioSpasialManager.simulate3DAudioUsingITD(
                                 it,
@@ -129,7 +138,6 @@ fun PosisiSampelDataScreen(
                     bluetoothLEViewModel.startConnection()
                 }
                 ConnectionState.Disconnected -> {
-                    // Jika koneksi terputus, reset grid
                     gridViewModel.resetGrid()
                     Text(text = "Koneksi terputus")
                 }
@@ -140,13 +148,13 @@ fun PosisiSampelDataScreen(
         }
     }
 
-    // Close BLE connection when this screen is removed
     DisposableEffect(Unit) {
         onDispose {
             bluetoothLEViewModel.closeConnection()
         }
     }
 }
+
 
 
 

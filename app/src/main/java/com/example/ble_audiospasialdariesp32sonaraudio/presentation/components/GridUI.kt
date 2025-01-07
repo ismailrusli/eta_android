@@ -23,58 +23,52 @@ fun GridUI(
     viewModel: OccupiedGridViewModel
 ) {
     // Ambil grid dari ViewModel
-    val grid = viewModel.getOccupiedGrid() // List of 2D grids
+    val grid = viewModel.getOccupiedGrid()
     val layersCount = grid.size // Jumlah layer Z
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top
+            .padding(16.dp)
     ) {
-        Text("Occupied Grid (3D Representation)")
+        item {
+            Text(
+                text = "Occupied Grid (3D Representation)",
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
 
-        // Gunakan LazyColumn untuk membuat grid yang dapat digulir
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f) // Untuk memberikan space agar grid bisa scrollable
-        ) {
-            items(layersCount) { z ->
-                Column(
+        // Loop melalui setiap layer Z
+        items(layersCount) { z ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = "Layer Z = $z",
                     modifier = Modifier
+                        .padding(bottom = 8.dp)
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    Text(
-                        text = "Layer Z = $z",
-                        modifier = Modifier
-                            .padding(bottom = 4.dp)
-                            .fillMaxWidth()
-                    )
+                )
 
-                    // Buat grid 2D untuk layer Z
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
+                // Gunakan Column biasa untuk grid 2D
+                grid[z].forEach { row ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        items(grid[z].size) { y ->
-                            Row(
+                        row.forEach { cell ->
+                            Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                grid[z][y].forEach { cell ->
-                                    Box(
-                                        modifier = Modifier
-                                            .size(30.dp)
-                                            .background(
-                                                if (cell) Color.Red else Color.Gray,
-                                                shape = RoundedCornerShape(4.dp)
-                                            )
+                                    .size(30.dp)
+                                    .background(
+                                        if (cell) Color.Red else Color.Gray,
+                                        shape = RoundedCornerShape(4.dp)
                                     )
-                                }
-                            }
+                            )
                         }
                     }
                 }
@@ -82,3 +76,4 @@ fun GridUI(
         }
     }
 }
+
