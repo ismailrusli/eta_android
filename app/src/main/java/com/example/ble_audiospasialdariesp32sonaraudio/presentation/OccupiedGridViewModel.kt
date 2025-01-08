@@ -25,7 +25,7 @@ class OccupiedGridViewModel : ViewModel() {
         imuDataSudut: IMUTerolahDataSudut // Sudut relatif objek
     ) {
         // Perbarui posisi perangkat berdasarkan data akselerometer
-        updateIMUPosition(imuDataPosisi, radius)
+        //updateIMUPosition(imuDataPosisi, radius)
 
         // Tandai posisi objek dalam grid berdasarkan sudut dan jarak
         tagObjectInGrid(sensorDistance, imuDataSudut, radius)

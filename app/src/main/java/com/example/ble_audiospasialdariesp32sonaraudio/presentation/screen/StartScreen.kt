@@ -76,6 +76,7 @@ fun StartScreen(
                     bluetoothAdapter = bluetoothAdapter
                 )
 
+
             }
         }
     }

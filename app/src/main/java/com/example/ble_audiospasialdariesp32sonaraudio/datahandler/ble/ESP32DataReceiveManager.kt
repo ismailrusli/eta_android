@@ -113,10 +113,12 @@ class ESP32DataReceiveManager @Inject constructor(
                     Log.d("BluetoothGattCallback", "Characteristic Changed: ${value.decodeToString()}")
 
                     val dataString = value.decodeToString().split("/")
-                    val _jarak = dataString[0].toFloat()
-                    val _timestamp = dataString[1].toLong()
-                    val _kecepatanPutaranArray = dataString[2].split(";")
-                    val _kecepatanTranslasiArray = dataString[3].split(";")
+                    val _sessionCount = dataString[0].toInt()
+                    val _dataCount = dataString[1].toInt()
+                    val _jarak = dataString[2].toFloat()
+                    val _timestamp = dataString[3].toLong()
+                    val _kecepatanPutaranArray = dataString[4].split(";")
+                    val _kecepatanTranslasiArray = dataString[4].split(";")
 
                     // Log the parsed values
 //                    Log.d("BluetoothGattCallback", "Parsed Jarak: $_jarak")
@@ -131,6 +133,8 @@ class ESP32DataReceiveManager @Inject constructor(
                         dataFlow.emit(
                             Resource.Success(
                                 ESP32DataResult(
+                                    sessionCount = _sessionCount,
+                                    dataCount = _dataCount,
                                     jarak = _jarak,
                                     timestamp = _timestamp,
                                     kecepatanPutaran = doubleArrayOf(

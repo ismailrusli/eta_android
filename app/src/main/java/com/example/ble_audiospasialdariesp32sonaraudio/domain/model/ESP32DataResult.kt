@@ -3,6 +3,8 @@ package com.example.ble_audiospasialdariesp32sonaraudio.domain.model
 import com.example.ble_audiospasialdariesp32sonaraudio.domain.repo.ConnectionState
 
 data class ESP32DataResult(
+    val sessionCount:Int,
+    val dataCount:Int,
     val jarak:Float,
     val kecepatanPutaran:DoubleArray,
     val kecepatanTranslasi:DoubleArray,

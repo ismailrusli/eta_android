@@ -8,23 +8,16 @@ import android.os.Looper
 import android.util.Log
 import com.example.ble_audiospasialdariesp32sonaraudio.R
 import kotlin.math.PI
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.pow
 import kotlin.math.sin
-import kotlin.math.sqrt
 
 class AudioSpasialManager(
     context: Context
-)
-{
+) {
     private val soundPool: SoundPool
     private var buzzingSound: Int = 0
     private var pingSound: Int = 0
-    private var streamId: Int = 0 // Menyimpan streamId untuk kontrol play/stop
-
-    private var streamIdKiri: Int = 0 // Stream ID untuk telinga kiri
-    private var streamIdKanan: Int = 0 // Stream ID untuk telinga kanan
+    private var streamIdLeft: Int = 0
+    private var streamIdRight: Int = 0
 
     init {
         val audioAttributes = AudioAttributes.Builder()
@@ -37,207 +30,91 @@ class AudioSpasialManager(
             .setAudioAttributes(audioAttributes)
             .build()
 
-        // Load the buzzing sound from the raw resource
         buzzingSound = soundPool.load(context, R.raw.buzzing_sound, 1)
         pingSound = soundPool.load(context, R.raw.sonar_ping_sound, 1)
     }
 
-    fun getSoundToPlay(soundOption: String): Int {
+    private fun getSoundToPlay(soundOption: String): Int {
         return when (soundOption) {
             "ping" -> pingSound
             "buzzing" -> buzzingSound
-            else -> buzzingSound // Default sound in case of invalid input
+            else -> buzzingSound
         }
     }
 
-    fun playBuzzingSound(
-        xPos: Float,
-        yPos: Float,
-        jarakMaksimum: Int,
-        soundOption: String
-    ) {
-        // Menghitung jarak dari pusat ke titik (xPos, yPos)
-        val jari_jari = sqrt(xPos * xPos + yPos * yPos) // Jarak
-
-        // Menghitung sudut θ dalam radian dan membatasi hanya untuk kuadran 1 dan 2
-        var theta = atan2(yPos, xPos)
-
-        // Membatasi theta hanya untuk kuadran 1 dan 2 (0 <= theta <= pi)
-        if (theta < 0) {
-            theta += PI.toFloat()
-        }
-
-        // Normalisasi jarak (semakin jauh jarak, semakin kecil volume)
-        val volume = (1 - (jari_jari / jarakMaksimum)).coerceIn(0f, 1f)
-
-        // Hitung panning berdasarkan sudut theta (kuadran 1 dan 2)
-        val leftVolume = (theta / PI.toFloat()) * volume
-        val rightVolume = (1 - theta / PI.toFloat()) * volume
-
-
-
-
-        Log.d("SoundController", "xPos: $xPos, yPos: $yPos, theta: ${theta * 180/Math.PI.toFloat()}, volume: $volume, jarak: ${jari_jari/100}")
-
-        // Get the sound to play based on soundOption
-        val soundToPlay = getSoundToPlay(soundOption)
-
-        if (streamId == 0) {
-            // Jika belum diputar, mulai putar suara dan simpan streamId
-            streamId = soundPool.play(soundToPlay, leftVolume, rightVolume, 1, -1, 1f)
-        } else {
-            // Jika suara sudah diputar, perbarui volume tanpa menghentikan suara
-            soundPool.setVolume(streamId, leftVolume, rightVolume)
-        }
-    }
-
-    fun iidCalculationVolume(
-        sudutTheta: Int,
-        jarakMaksimum: Float,
-        jari_jari: Float
-    ):Pair<Float,Float>{
-
-        var xPosObjek =  jari_jari * cos(sudutTheta * (Math.PI.toFloat() / 180))
-        var yPosObjek =  jari_jari * sin(sudutTheta * (Math.PI.toFloat() / 180))
-
-        var _sudutTheta = atan2(yPosObjek, xPosObjek)
-
-        // Normalisasi jarak (semakin jauh jarak, semakin kecil volume)
-        val volume = (1 - (jari_jari / jarakMaksimum)).coerceIn(0f, 1f)
-
-
-        // Membatasi theta hanya untuk kuadran 1 dan 2 (0 <= theta <= pi)
-        if (_sudutTheta < 0) {
-            _sudutTheta += PI.toFloat()
-        }
-
-        // Hitung panning berdasarkan sudut theta (kuadran 1 dan 2)
-        val leftVolume = (_sudutTheta / PI.toFloat()) * volume
-        val rightVolume = (1 - _sudutTheta / PI.toFloat()) * volume
-
-
+    // Interaural Intensity Difference (IID) and Volume Calculation
+    private fun calculateIIDVolume(
+        distance: Float,
+        radius: Float,
+        maxVolume: Float,
+        theta: Int
+    ): Pair<Float, Float> {
+        val normalizedVolume = (1 - (distance / radius)).coerceIn(0f, 1f) * maxVolume
+        val leftVolume = (theta / PI.toFloat()) * normalizedVolume
+        val rightVolume = (1 - theta / PI.toFloat()) * normalizedVolume
         return Pair(leftVolume, rightVolume)
     }
 
-    // Fungsi untuk menghentikan suara secara manual
-    fun stopBuzzingSound() {
-        if (streamId != 0) {
-            soundPool.stop(streamId)
-            streamId = 0 // Reset streamId setelah dihentikan
-        }
+    // Interaural Time Difference (ITD) Calculation
+    private fun calculateITD(theta: Int): Double {
+        // Average distance between ears ~20cm; speed of sound ~343 m/s
+        return (20 * sin(theta.toDouble())) / 34300 * 1000 // Return ITD in milliseconds
     }
 
-    // Ubah sudut theta ke kuadran 1 dan 4
-    //perbedaan waktu kedatangan suara antara dua telinga (iitd)
-
-    fun itdCalculation(
-        sudutTheta : Int
-    ):Float{
-        var sudutDalamRadian:Float = sudutTheta * (Math.PI.toFloat() / 180f)
-        // rata rata jarak antra dua telinga itu 20 cm. 34300 itu kecepatan suara
-        return (20 * sin(sudutDalamRadian)) / 34300 * 1000
-    }
-
-    fun simulate3DAudioUsingITD(
-        jari_jari:Float,
-        jarakMaksimum: Int,
-        sudutTheta: Int,
+    fun simulate3DAudio(
+        distance: Float,
+        radius: Float,
+        yaw: Int, // Yaw is now an integer
         soundOption: String
-    ){
-        // Normalisasi jarak (semakin jauh jarak, semakin kecil volume)
-        val volume = (1 - (jari_jari / jarakMaksimum)).coerceIn(0f, 1f)
+    ) {
+        val adjustedYaw = yaw.coerceIn(0, 180) // Ensure yaw is within 0 to 180
+        val (leftVolume, rightVolume) = calculateIIDVolume(distance, radius, 1f, adjustedYaw)
+        val itdDelay = calculateITD(adjustedYaw)
 
-        val(iidKiri, iidKanan) = iidCalculationVolume(sudutTheta, jarakMaksimum.toFloat(), jari_jari)
-        val itdVolume = itdCalculation(sudutTheta)
+        Log.d(
+            "AudioSimulation",
+            "Distance: $distance, Radius: $radius, Yaw: $yaw, ITD: $itdDelay ms, Volumes: L=$leftVolume R=$rightVolume"
+        )
 
-        Log.d("SoundController", "ITD: $itdVolume ms for angle: $sudutTheta")
-
-        // Get the sound to play based on soundOption
         val soundToPlay = getSoundToPlay(soundOption)
 
-        if (streamIdKiri == 0 && streamIdKanan == 0) {
+        if (streamIdLeft == 0 && streamIdRight == 0) {
             when {
-                sudutTheta > 90 -> {
-                    // Kuadran 2: Suara kiri dulu, kanan dengan delay ITD
-                    streamIdKiri = soundPool.play(soundToPlay, iidKiri, 0f, 1, -1, 1f)
+                yaw > 90 -> {
+                    streamIdLeft = soundPool.play(soundToPlay, leftVolume, 0f, 1, -1, 1f)
                     Handler(Looper.getMainLooper()).postDelayed({
-                        streamIdKanan = soundPool.play(soundToPlay, 0f, iidKanan, 1, -1, 1f)
-                    }, itdVolume.toLong())
+                        streamIdRight = soundPool.play(soundToPlay, 0f, rightVolume, 1, -1, 1f)
+                    }, itdDelay.toLong())
                 }
-                sudutTheta == 90 -> {
-                    // Tengah-tengah: Mainkan suara kiri dan kanan bersamaan
-                    streamIdKiri = soundPool.play(soundToPlay, iidKiri, 0f, 1, -1, 1f)
-                    streamIdKanan = soundPool.play(soundToPlay, 0f, iidKanan, 1, -1, 1f)
+                yaw == 90 -> {
+                    streamIdLeft = soundPool.play(soundToPlay, leftVolume, 0f, 1, -1, 1f)
+                    streamIdRight = soundPool.play(soundToPlay, 0f, rightVolume, 1, -1, 1f)
                 }
-                sudutTheta < 90 -> {
-                    // Kuadran 1: Suara kanan dulu, kiri dengan delay ITD
-                    streamIdKanan = soundPool.play(soundToPlay, 0f, iidKanan, 1, -1, 1f)
+                yaw < 90 -> {
+                    streamIdRight = soundPool.play(soundToPlay, 0f, rightVolume, 1, -1, 1f)
                     Handler(Looper.getMainLooper()).postDelayed({
-                        streamIdKiri = soundPool.play(soundToPlay, iidKiri, 0f, 1, -1, 1f)
-                    }, itdVolume.toLong())
+                        streamIdLeft = soundPool.play(soundToPlay, leftVolume, 0f, 1, -1, 1f)
+                    }, itdDelay.toLong())
                 }
             }
         } else {
-            // Jika suara sudah diputar, perbarui volume tanpa menghentikan suara
-            soundPool.setVolume(streamIdKiri, volume, 0f)
-            soundPool.setVolume(streamIdKanan, 0f, volume)
+            soundPool.setVolume(streamIdLeft, leftVolume, 0f)
+            soundPool.setVolume(streamIdRight, 0f, rightVolume)
         }
     }
 
-    // Fungsi untuk menghentikan suara secara manual
-    fun stopBuzzingSound2Channel() {
-        if (streamIdKiri != 0) {
-            soundPool.stop(streamIdKiri)
-            streamIdKiri = 0 // Reset streamIdKiri setelah dihentikan
+
+    fun stop3DAudio() {
+        if (streamIdLeft != 0) {
+            soundPool.stop(streamIdLeft)
+            streamIdLeft = 0
         }
-        if (streamIdKanan != 0) {
-            soundPool.stop(streamIdKanan)
-            streamIdKanan = 0 // Reset streamIdKanan setelah dihentikan
+        if (streamIdRight != 0) {
+            soundPool.stop(streamIdRight)
+            streamIdRight = 0
         }
     }
 
-    fun playBuzzingSoundDownMixing(
-        jari_jari: Float,
-        jarakMaksimum: Float,
-        sudutTheta: Int
-    ) {
-        var xPosObjek =  jari_jari * cos(sudutTheta * (Math.PI.toFloat() / 180))
-        var yPosObjek =  jari_jari * sin(sudutTheta * (Math.PI.toFloat() / 180))
-
-        var xFRSpeaker = jarakMaksimum * (cos(45f * (Math.PI.toFloat() / 180)))
-        var yFRSpeaker = jarakMaksimum * (sin(45f * (Math.PI.toFloat() / 180)))
-
-        var xFLSpeaker = jarakMaksimum * (cos((45f + 90f) * (Math.PI.toFloat() / 180)))
-        var yFLSpeaker = jarakMaksimum * (sin((45f + 90f) * (Math.PI.toFloat() / 180)))
-
-        var xRRSpeaker = jarakMaksimum * (cos((45f - 90f) * (Math.PI.toFloat() / 180)))
-        var yRRSpeaker = jarakMaksimum * (sin((45f - 90f) * (Math.PI.toFloat() / 180)))
-
-        var xRLSpeaker = jarakMaksimum * (cos((45f + 180f) * (Math.PI.toFloat() / 180)))
-        var yRLSpeaker = jarakMaksimum * (sin((45f + 180f) * (Math.PI.toFloat() / 180)))
-
-        var xCenterSpeaker = 0f
-        var yCenterSpeaker = jarakMaksimum
-
-        var rFRSpeakerObjek     = sqrt((xFRSpeaker - xPosObjek).pow(2) + (yFRSpeaker - yPosObjek).pow(2) ) // Vektor FR
-        var rFLSpeakerObjek     = sqrt((xFLSpeaker - xPosObjek).pow(2) + (yFLSpeaker - yPosObjek).pow(2) ) // Vektor FL
-        var rRRSpeakerObjek     = sqrt((xRRSpeaker - xPosObjek).pow(2) + (yRRSpeaker - yPosObjek).pow(2) ) // Vektor RR
-        var rRLSpeakerObjek     = sqrt((xRLSpeaker - xPosObjek).pow(2) + (yRLSpeaker - yPosObjek).pow(2) ) // Vektor RL
-        var rCenterSpeakerObjek = sqrt((xCenterSpeaker - xPosObjek).pow(2) + (yCenterSpeaker - yPosObjek).pow(2) ) //  Vektor Center
-
-        // Menghitung volume untuk setiap speaker berdasarkan jarak
-        val volumeFR = (1 - (rFRSpeakerObjek / jarakMaksimum)).coerceIn(0f, 1f) // Volume Front Right
-        val volumeFL = (1 - (rFLSpeakerObjek / jarakMaksimum)).coerceIn(0f, 1f) // Volume Front Left
-        val volumeRR = (1 - (rRRSpeakerObjek / jarakMaksimum)).coerceIn(0f, 1f) // Volume Rear Right
-        val volumeRL = (1 - (rRLSpeakerObjek / jarakMaksimum)).coerceIn(0f, 1f) // Volume Rear Left
-        val volumeCenter = (1 - (rCenterSpeakerObjek / jarakMaksimum)).coerceIn(0f, 1f) // Volume Center
-
-        // Hitung volume akhir untuk kanal kiri dan kanan
-        val finalVolumeLeft = (volumeFL + volumeRL + volumeCenter) / 3 // Rata-rata volume untuk kiri
-        val finalVolumeRight = (volumeFR + volumeRR + volumeCenter) / 3 // Rata-rata volume untuk kanan
-    }
-
-    // Fungsi untuk membersihkan resource SoundPool no memory leak mwahahah
     fun release() {
         soundPool.release()
     }
