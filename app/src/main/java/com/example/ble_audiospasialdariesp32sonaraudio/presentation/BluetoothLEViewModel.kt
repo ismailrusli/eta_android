@@ -43,6 +43,12 @@ class BluetoothLEViewModel @Inject constructor(
     val kecepatanAkselerasi = _kecepatanAkselerasi.asStateFlow()
 
 
+    private val _sessionCount = MutableStateFlow<Int?>(null) // Change back to MutableStateFlow for single latest value
+    val sessionCount: StateFlow<Int?> = _sessionCount.asStateFlow() // Expose it as StateFlow for the UI
+
+    private val _dataCount = MutableStateFlow<Int?>(null) // Change back to MutableStateFlow for single latest value
+    val dataCount: StateFlow<Int?> = _dataCount.asStateFlow() // Expose it as StateFlow for the UI
+
     init {
         subscribeToChanges() // Subscribe immediately on ViewModel creation
     }
@@ -56,6 +62,8 @@ class BluetoothLEViewModel @Inject constructor(
                 eSP32DataReceiveManager.dataFlow.collect { result ->
                     when (result) {
                         is Resource.Success -> {
+                            _sessionCount.value = result.data.sessionCount
+                            _dataCount.value = result.data.dataCount
                             _connectionState.value = result.data.connectionState
                             _jarak.value = result.data.jarak // Update the StateFlow with new jarak value
                             _timestamp.value = result.data.timestamp

@@ -51,6 +51,9 @@ fun PosisiSampelDataScreen(
     previousTimestamp = timestamp
 
     // Get states from ViewModel
+    val sessionCount by bluetoothLEViewModel.sessionCount.collectAsState()
+    val dataCount by bluetoothLEViewModel.dataCount.collectAsState()
+
     val jarak by bluetoothLEViewModel.jarak.collectAsState()
     val kecepatanAngular by bluetoothLEViewModel.kecepatanAngular.collectAsState()
     val kecepatanAkselerasi by bluetoothLEViewModel.kecepatanAkselerasi.collectAsState()
@@ -77,6 +80,7 @@ fun PosisiSampelDataScreen(
                     } else {
                         imuCalcViewModel.updateIMUData(
                             context = context,
+                            sessionCount = sessionCount!!,
                             timestamp = System.currentTimeMillis(),
                             gyroData = kecepatanAngular,
                             accelData = kecepatanAkselerasi
